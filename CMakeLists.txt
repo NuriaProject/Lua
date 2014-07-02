@@ -14,7 +14,7 @@ FIND_PACKAGE(Qt5Core REQUIRED)
 
 # Build LuaJit
 add_custom_target(build_luajit ALL
-                  COMMAND ${CMAKE_MAKE_PROGRAM} TARGET_CFLAGS=-fPIC
+                  COMMAND ${CMAKE_MAKE_PROGRAM} TARGET_CFLAGS=-fPIC BUILDMODE=static
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/luajit/src
                   COMMENT "LuaJit library")
 
@@ -22,12 +22,8 @@ add_custom_target(build_luajit ALL
 SET(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/luajit/src)
 include_directories(${LUA_INCLUDE_DIR})
 
-# Link LuaJit into the library. Windows needs a shared lib :|
-if(WIN32)
-  SET(LUAJIT_LIB ${LUA_INCLUDE_DIR}/libluajit.lib)
-ELSE()
-  SET(LUAJIT_LIB ${LUA_INCLUDE_DIR}/libluajit.a)
-ENDIF()
+SET(LUAJIT_LIB ${LUA_INCLUDE_DIR}/libluajit.a)
+
 
 # 
 SET(NuriaLua_SRC
@@ -53,6 +49,7 @@ SET(NuriaLua_SRC
 
 # C++11
 LIST(APPEND CMAKE_CXX_FLAGS "-std=c++11")
+add_definitions(-DNURIA_LUA_LIBRARY)
 
 # Create build target
 ADD_LIBRARY(LuaJit IMPORTED STATIC)
@@ -72,7 +69,11 @@ set_target_properties(
 )
 
 # Install target
-INSTALL(TARGETS NuriaLua LIBRARY DESTINATION lib)
+INSTALL(TARGETS NuriaLua 
+		LIBRARY DESTINATION lib
+		ARCHIVE DESTINATION lib
+		RUNTIME DESTINATION lib
+)
 INSTALL(DIRECTORY src/ DESTINATION include/nuria/lua
         FILES_MATCHING PATTERN "*.hpp"
         PATTERN "private" EXCLUDE
