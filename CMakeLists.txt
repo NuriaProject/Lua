@@ -73,7 +73,7 @@ set_target_properties(
 
 # Install target
 INSTALL(TARGETS NuriaLua LIBRARY DESTINATION lib)
-INSTALL(DIRECTORY src/ DESTINATION include/nuria/lua
+INSTALL(DIRECTORY src/ DESTINATION include/nuria
         FILES_MATCHING PATTERN "*.hpp"
         PATTERN "private" EXCLUDE
 )
