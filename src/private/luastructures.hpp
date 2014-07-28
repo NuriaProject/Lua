@@ -18,7 +18,7 @@
 #ifndef NURIA_LUASTRUCTURES_HPP
 #define NURIA_LUASTRUCTURES_HPP
 
-#include <metaobject.hpp>
+#include <nuria/metaobject.hpp>
 
 namespace Nuria {
 

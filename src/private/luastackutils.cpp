@@ -18,8 +18,8 @@
 #include "luastackutils.hpp"
 
 #include "luacallbacktrampoline.hpp"
-#include "../luaruntime.hpp"
-#include <callback.hpp>
+#include "../nuria/luaruntime.hpp"
+#include <nuria/callback.hpp>
 
 Nuria::LuaValues Nuria::LuaStackUtils::popResultsFromStack (LuaRuntime *runtime, int oldTop) {
 	

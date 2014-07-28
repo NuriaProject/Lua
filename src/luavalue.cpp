@@ -15,15 +15,15 @@
  *       distribution.
  */
 
-#include "luavalue.hpp"
+#include "nuria/luavalue.hpp"
 
 #include <QSharedData>
 #include <QPointer>
 #include <lua.hpp>
 
 #include "private/luastackutils.hpp"
-#include "luaruntime.hpp"
-#include "luaobject.hpp"
+#include "nuria/luaruntime.hpp"
+#include "nuria/luaobject.hpp"
 
 namespace Nuria {
 class Q_DECL_HIDDEN LuaValuePrivate : public QSharedData {

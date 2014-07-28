@@ -19,8 +19,8 @@
 #define NURIA_LUARUNTIMEPRIVATE_HPP
 
 #include "luastructures.hpp"
-#include "../luaruntime.hpp"
-#include "../luavalue.hpp"
+#include "../nuria/luaruntime.hpp"
+#include "../nuria/luavalue.hpp"
 #include <lua.hpp>
 
 namespace Nuria {

@@ -19,7 +19,7 @@
 
 #include "luametaobjectwrapper.hpp"
 #include "luaruntimeprivate.hpp"
-#include "../luaruntime.hpp"
+#include "../nuria/luaruntime.hpp"
 #include "luastructures.hpp"
 #include <lua.hpp>
 

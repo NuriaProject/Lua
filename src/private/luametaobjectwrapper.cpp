@@ -17,12 +17,12 @@
 
 #include "luametaobjectwrapper.hpp"
 
-#include <metaobject.hpp>
+#include <nuria/metaobject.hpp>
 #include "luaruntimeprivate.hpp"
 #include "luastackutils.hpp"
 #include "luastructures.hpp"
-#include "../luaruntime.hpp"
-#include <debug.hpp>
+#include "../nuria/luaruntime.hpp"
+#include <nuria/debug.hpp>
 #include <lua.hpp>
 
 namespace Nuria {

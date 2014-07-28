@@ -18,7 +18,7 @@
 #ifndef NURIA_LUACALLBACKTRAMPOLINE_HPP
 #define NURIA_LUACALLBACKTRAMPOLINE_HPP
 
-#include "../luavalue.hpp"
+#include "../nuria/luavalue.hpp"
 #include <QVariant>
 #include <lua.hpp>
 

@@ -15,7 +15,7 @@
  *       distribution.
  */
 
-#include "luaobject.hpp"
+#include "nuria/luaobject.hpp"
 
 #include <QSharedData>
 #include <QPointer>
@@ -25,8 +25,8 @@
 #include "private/luametaobjectwrapper.hpp"
 #include "private/luaruntimeprivate.hpp"
 #include "private/luastructures.hpp"
-#include <metaobject.hpp>
-#include "luaruntime.hpp"
+#include <nuria/metaobject.hpp>
+#include "nuria/luaruntime.hpp"
 
 namespace Nuria {
 

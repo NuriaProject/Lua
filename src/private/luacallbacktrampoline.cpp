@@ -18,9 +18,9 @@
 #include "luacallbacktrampoline.hpp"
 
 #include "luastackutils.hpp"
-#include "../luaruntime.hpp"
-#include "../luavalue.hpp"
-#include <debug.hpp>
+#include "../nuria/luaruntime.hpp"
+#include "../nuria/luavalue.hpp"
+#include <nuria/debug.hpp>
 #include <QPointer>
 
 namespace Nuria {

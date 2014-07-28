@@ -15,11 +15,11 @@
  *       distribution.
  */
 
-#include "luaruntime.hpp"
+#include "nuria/luaruntime.hpp"
 
-#include <metaobject.hpp>
-#include <callback.hpp>
-#include <debug.hpp>
+#include <nuria/metaobject.hpp>
+#include <nuria/callback.hpp>
+#include <nuria/debug.hpp>
 #include <QIODevice>
 #include <QPointer>
 #include <QVariant>

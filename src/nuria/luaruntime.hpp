@@ -21,7 +21,7 @@
 #include <functional>
 #include <QObject>
 
-#include <metaobject.hpp>
+#include <nuria/metaobject.hpp>
 #include "lua_global.hpp"
 #include "luavalue.hpp"
 

@@ -27,13 +27,13 @@ SET(LUAJIT_LIB ${LUA_INCLUDE_DIR}/libluajit.a)
 
 # 
 SET(NuriaLua_SRC
-    src/lua_global.hpp
+    src/nuria/lua_global.hpp
     src/luaobject.cpp
-    src/luaobject.hpp
+    src/nuria/luaobject.hpp
     src/luaruntime.cpp
-    src/luaruntime.hpp
+    src/nuria/luaruntime.hpp
     src/luavalue.cpp
-    src/luavalue.hpp
+    src/nuria/luavalue.hpp
     src/private/luabuiltinfunctions.cpp
     src/private/luabuiltinfunctions.hpp
     src/private/luacallbacktrampoline.cpp

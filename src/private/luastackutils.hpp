@@ -18,8 +18,8 @@
 #ifndef NURIA_LUASTACKUTILS_HPP
 #define NURIA_LUASTACKUTILS_HPP
 
-#include <callback.hpp>
-#include "../luavalue.hpp"
+#include <nuria/callback.hpp>
+#include "../nuria/luavalue.hpp"
 #include <lua.hpp>
 
 namespace Nuria {
