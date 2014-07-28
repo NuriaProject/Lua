@@ -20,7 +20,7 @@
 
 #include <QtCore/qglobal.h>
 
-#if defined(NURIA_LUA_LIBRARY)
+#if defined(NuriaLua_EXPORTS)
 #  define NURIA_LUA_EXPORT Q_DECL_EXPORT
 #else
 #  define NURIA_LUA_EXPORT Q_DECL_IMPORT

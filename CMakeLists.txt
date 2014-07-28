@@ -49,7 +49,6 @@ SET(NuriaLua_SRC
 
 # C++11
 LIST(APPEND CMAKE_CXX_FLAGS "-std=c++11")
-add_definitions(-DNURIA_LUA_LIBRARY)
 
 # Create build target
 ADD_LIBRARY(LuaJit IMPORTED STATIC)
