@@ -78,3 +78,7 @@ INSTALL(DIRECTORY src/ DESTINATION include/nuria
         FILES_MATCHING PATTERN "*.hpp"
         PATTERN "private" EXCLUDE
 )
+
+# Add Tests
+enable_testing()
+add_unittest(NAME tst_luaruntime NURIA NuriaLua SOURCES structures.hpp)
