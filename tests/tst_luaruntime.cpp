@@ -29,6 +29,8 @@ class LuaRuntimeTest : public QObject {
 	Q_OBJECT
 private slots:
 	
+	void initTestCase ();
+	
 	// Basic types
 	void returnInt ();
 	void returnBool ();
@@ -63,7 +65,17 @@ private slots:
 	void passTestStructToCppAsPointer ();
 	void verifyStructureWrapperExistsOnlyOnce ();
 	
+private:
+	bool hasTria = false;
+	
 };
+
+#define NEEDS_TRIA \
+	if (!this->hasTria) QSKIP("Tria is needed for this test-case.")
+
+void LuaRuntimeTest::initTestCase () {
+	this->hasTria = (MetaObject::byName ("TestStruct") != nullptr);
+}
 
 void LuaRuntimeTest::returnInt() {
 	LuaRuntime runtime (LuaRuntime::AllLibraries);
@@ -215,6 +227,8 @@ void LuaRuntimeTest::globalFromCode () {
 }
 
 void LuaRuntimeTest::structureToLua () {
+	NEEDS_TRIA;
+	
 	LuaRuntime runtime (LuaRuntime::AllLibraries);
 	
 	TestStruct f;
@@ -235,6 +249,8 @@ void LuaRuntimeTest::structureToLua () {
 }
 
 void LuaRuntimeTest::pointerToLua () {
+	NEEDS_TRIA;
+	
 	LuaRuntime runtime (LuaRuntime::AllLibraries);
 	
 	TestStruct *f = new TestStruct;
@@ -257,6 +273,8 @@ void LuaRuntimeTest::pointerToLua () {
 }
 
 void LuaRuntimeTest::constructClassInLua () {
+	NEEDS_TRIA;
+	
 	LuaRuntime runtime (LuaRuntime::AllLibraries);
 	
 	// Registers 'TestStruct' in 'Test' inside LUA
@@ -274,6 +292,8 @@ void LuaRuntimeTest::constructClassInLua () {
 }
 
 void LuaRuntimeTest::invokeMemberMethod () {
+	NEEDS_TRIA;
+	
 	LuaRuntime runtime (LuaRuntime::AllLibraries);
 	
 	TestStruct f;
@@ -290,6 +310,8 @@ void LuaRuntimeTest::invokeMemberMethod () {
 }
 
 void LuaRuntimeTest::invokeStaticMethod () {
+	NEEDS_TRIA;
+	
 	LuaRuntime runtime (LuaRuntime::AllLibraries);
 	
 	TestStruct f;
@@ -303,6 +325,8 @@ void LuaRuntimeTest::invokeStaticMethod () {
 }
 
 void LuaRuntimeTest::globalTestStruct () {
+	NEEDS_TRIA;
+	
 	LuaRuntime runtime (LuaRuntime::AllLibraries);
 	
 	MetaObject *meta = MetaObject::byName ("TestStruct");
@@ -327,6 +351,8 @@ void LuaRuntimeTest::globalTestStruct () {
 }
 
 void LuaRuntimeTest::returnTestStruct () {
+	NEEDS_TRIA;
+	
 	LuaRuntime runtime (LuaRuntime::AllLibraries);
 	
 	MetaObject *meta = MetaObject::byName ("TestStruct");
@@ -352,6 +378,8 @@ void LuaRuntimeTest::returnTestStruct () {
 }
 
 void LuaRuntimeTest::passTestStructToCpp () {
+	NEEDS_TRIA;
+	
 	LuaRuntime runtime (LuaRuntime::AllLibraries);
 	
 	MetaObject *meta = MetaObject::byName ("TestStruct");
@@ -372,6 +400,8 @@ void LuaRuntimeTest::passTestStructToCpp () {
 }
 
 void LuaRuntimeTest::passTestStructToCppAsPointer () {
+	NEEDS_TRIA;
+	
 	LuaRuntime runtime (LuaRuntime::AllLibraries);
 	
 	MetaObject *meta = MetaObject::byName ("TestStruct");
@@ -395,6 +425,8 @@ void LuaRuntimeTest::passTestStructToCppAsPointer () {
 }
 
 void LuaRuntimeTest::verifyStructureWrapperExistsOnlyOnce () {
+	NEEDS_TRIA;
+	
 	LuaRuntime runtime (LuaRuntime::AllLibraries);
 	
 	MetaObject *meta = MetaObject::byName ("TestStruct");
