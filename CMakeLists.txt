@@ -24,7 +24,6 @@ include_directories(${LUA_INCLUDE_DIR})
 
 SET(LUAJIT_LIB ${LUA_INCLUDE_DIR}/libluajit.a)
 
-
 # 
 SET(NuriaLua_SRC
     src/nuria/lua_global.hpp
@@ -55,10 +54,13 @@ ADD_LIBRARY(LuaJit IMPORTED STATIC)
 ADD_LIBRARY(NuriaLua SHARED ${NuriaLua_SRC})
 set_property(TARGET LuaJit APPEND PROPERTY IMPORTED_CONFIGURATIONS NOCONFIG)
 set_target_properties(LuaJit PROPERTIES IMPORTED_LOCATION_NOCONFIG ${LUAJIT_LIB})
-target_link_libraries(NuriaLua NuriaCore)
-target_link_libraries(NuriaLua LuaJit)
+target_link_libraries(NuriaLua NuriaCore LuaJit)
 add_dependencies(LuaJit build_luajit)
 QT5_USE_MODULES(NuriaLua Core)
+
+if(UNIX)
+  target_link_libraries(NuriaLua -ldl)
+endif()
 
 # 
 set_target_properties(
