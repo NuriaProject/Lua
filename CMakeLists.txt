@@ -76,7 +76,7 @@ INSTALL(TARGETS NuriaLua
         RUNTIME DESTINATION lib
 )
 
-INSTALL(DIRECTORY src/ DESTINATION include/nuria
+INSTALL(DIRECTORY src/nuria/ DESTINATION include/nuria
         FILES_MATCHING PATTERN "*.hpp"
         PATTERN "private" EXCLUDE
 )
