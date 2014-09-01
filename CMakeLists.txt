@@ -46,9 +46,6 @@ SET(NuriaLua_SRC
     src/private/luastructures.hpp
 )
 
-# C++11
-LIST(APPEND CMAKE_CXX_FLAGS "-std=c++11")
-
 # Create build target
 ADD_LIBRARY(LuaJit IMPORTED STATIC)
 ADD_LIBRARY(NuriaLua SHARED ${NuriaLua_SRC})
