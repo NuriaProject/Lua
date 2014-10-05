@@ -18,7 +18,7 @@
 #ifndef NURIA_LUA_GLOBAL_HPP
 #define NURIA_LUA_GLOBAL_HPP
 
-#include <QtCore/qglobal.h>
+#include <qglobal.h>
 
 #if defined(NuriaLua_EXPORTS)
 #  define NURIA_LUA_EXPORT Q_DECL_EXPORT
