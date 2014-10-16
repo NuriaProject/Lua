@@ -17,14 +17,17 @@ if (NOT TARGET NuriaCore)
   FIND_PACKAGE(NuriaCore REQUIRED)
 endif()
 
+# 
+SET(LUAJIT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/luajit)
+
 # Build LuaJit
 add_custom_target(build_luajit ALL
                   COMMAND ${CMAKE_MAKE_PROGRAM} TARGET_CFLAGS=-fPIC BUILDMODE=static
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/luajit/src
+                  WORKING_DIRECTORY ${LUAJIT_PATH}/src
                   COMMENT "LuaJit library")
 
 # 
-SET(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/luajit/src)
+SET(LUA_INCLUDE_DIR ${LUAJIT_PATH}/src)
 include_directories(${LUA_INCLUDE_DIR})
 
 SET(LUAJIT_LIB ${LUA_INCLUDE_DIR}/libluajit.a)
