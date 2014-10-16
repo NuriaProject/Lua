@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 2.8.8)
 PROJECT(NuriaLua)
 
 cmake_policy(SET CMP0020 NEW)
+include(../3rdparty/3rdparty.cmake)
 
 # Enable moc
 SET(CMAKE_AUTOMOC ON)
@@ -16,21 +17,6 @@ FIND_PACKAGE(Qt5Core REQUIRED)
 if (NOT TARGET NuriaCore)
   FIND_PACKAGE(NuriaCore REQUIRED)
 endif()
-
-# 
-SET(LUAJIT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/luajit)
-
-# Build LuaJit
-add_custom_target(build_luajit ALL
-                  COMMAND ${CMAKE_MAKE_PROGRAM} TARGET_CFLAGS=-fPIC BUILDMODE=static
-                  WORKING_DIRECTORY ${LUAJIT_PATH}/src
-                  COMMENT "LuaJit library")
-
-# 
-SET(LUA_INCLUDE_DIR ${LUAJIT_PATH}/src)
-include_directories(${LUA_INCLUDE_DIR})
-
-SET(LUAJIT_LIB ${LUA_INCLUDE_DIR}/libluajit.a)
 
 # 
 SET(NuriaLua_SRC
@@ -55,12 +41,9 @@ SET(NuriaLua_SRC
 )
 
 # Create build target
-ADD_LIBRARY(LuaJit IMPORTED STATIC)
 ADD_LIBRARY(NuriaLua SHARED ${NuriaLua_SRC})
-set_property(TARGET LuaJit APPEND PROPERTY IMPORTED_CONFIGURATIONS NOCONFIG)
-set_target_properties(LuaJit PROPERTIES IMPORTED_LOCATION_NOCONFIG ${LUAJIT_LIB})
+target_include_directories(NuriaLua PRIVATE ${LUAJIT_INCLUDE_DIR})
 target_link_libraries(NuriaLua NuriaCore LuaJit)
-add_dependencies(LuaJit build_luajit)
 QT5_USE_MODULES(NuriaLua Core)
 
 if(UNIX)
