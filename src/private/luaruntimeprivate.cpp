@@ -65,8 +65,17 @@ void Nuria::LuaRuntimePrivate::removeObject (void *object) {
 	
 }
 
+bool Nuria::LuaRuntimePrivate::checkQObjectOwnership (LuaRuntime *runtime, LuaWrapperUserData *data) {
+	const QMetaObject *meta = QMetaType::metaObjectForType (data->meta->pointerMetaTypeId ());
+	if (meta) {
+		data->owned = (static_cast< QObject * > (data->ptr)->parent () == runtime);
+	}
+	
+	return (meta != nullptr); // Is this a QObject?
+}
+
 static Nuria::LuaWrapperUserData *newUserData (lua_State *env, void *object, int ref,
-					       Nuria::MetaObject *meta, bool owned) {
+                                               Nuria::MetaObject *meta, bool owned) {
 	Nuria::LuaWrapperUserData *data;
 	data = (Nuria::LuaWrapperUserData *)lua_newuserdata (env, sizeof(Nuria::LuaWrapperUserData));
 	
@@ -79,7 +88,7 @@ static Nuria::LuaWrapperUserData *newUserData (lua_State *env, void *object, int
 }
 
 void Nuria::LuaRuntimePrivate::pushOrCreateUserDataObject (void *object, Nuria::MetaObject *meta,
-						    int metaTable, bool owned, int ref) {
+                                                           int metaTable, bool owned, int ref) {
 	LuaWrapperUserData *delegate = this->objects.value (object);
 	
 //	nDebug() << "Pushing" << object << "- Already known to LUA:" << (delegate ? "yes" : "no");
@@ -100,6 +109,11 @@ void Nuria::LuaRuntimePrivate::pushOrCreateUserDataObject (void *object, Nuria::
 	// Create new delegate structure
 	delegate = newUserData (this->env, object, ref, meta, owned);
 	this->objects.insert (object, delegate);
+	
+	// Set up ownership
+	if (owned && checkQObjectOwnership (this->q_ptr, delegate)) {
+		static_cast< QObject * > (object)->setParent (this->q_ptr);
+	}
 	
 	// Copy 'delegate' before the table in the stack, we leave it there as return value
 	lua_pushvalue (this->env, -1);
@@ -130,7 +144,11 @@ void Nuria::LuaRuntimePrivate::pushWrapperObject (Nuria::MetaObject *meta, int m
 
 bool Nuria::LuaRuntimePrivate::invokeGarbageHandler (bool owned, void *object, MetaObject *meta) {
 	LuaRuntime::Ownership o = (owned) ? LuaRuntime::OwnedByLua : LuaRuntime::OwnedByCpp;
+	if ((this->handlerFlags & o) == 0) {
+		return owned;
+	}
 	
+	// 
 	try {
 		bool destroy = this->objectHandler (o, object, meta);
 		return (owned) ? destroy : false;

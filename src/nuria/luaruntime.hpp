@@ -230,9 +230,9 @@ public:
 	
 	/**
 	 * Installs a object handler called whenever a object is about to be
-	 * collected by LUAs garbage collector. You can control when \a handler
+	 * collected by Luas garbage collector. You can control when \a handler
 	 * should be called using \a flags, e.g. to be only notified when an
-	 * object owned by LUA is collected.
+	 * object owned by Lua is collected.
 	 * 
 	 * \sa ObjectHandler
 	 */

@@ -91,6 +91,7 @@ public:
 	
 	static void destroyRecursive (lua_State *env, LuaRuntime *runtime, LuaWrapperUserData *data) {
 		runtime->d_ptr->removeObject (data);
+		runtime->d_ptr->checkQObjectOwnership (runtime, data);
 		
 		if (data->ptr && runtime->d_ptr->invokeGarbageHandler (data->owned, data->ptr, data->meta)) {
 			if (data->reference > 0) { // Is this a sub-class?

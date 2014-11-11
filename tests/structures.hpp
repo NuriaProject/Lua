@@ -21,6 +21,7 @@
 #include <nuria/essentials.hpp>
 #include <QMetaType>
 #include <QString>
+#include <QObject>
 
 struct NURIA_INTROSPECT TestStruct {
 	int a;
@@ -45,7 +46,17 @@ struct NURIA_INTROSPECT TestStruct {
 	
 };
 
+class NURIA_INTROSPECT TestObject : public QObject {
+	Q_OBJECT
+public:
+	
+	TestObject () { }
+	~TestObject () { qDebug("~TestObject"); }
+	
+};
+
 // Needed for QVariant::fromValue().
+Q_DECLARE_METATYPE(TestObject*)
 Q_DECLARE_METATYPE(TestStruct*)
 Q_DECLARE_METATYPE(TestStruct)
 

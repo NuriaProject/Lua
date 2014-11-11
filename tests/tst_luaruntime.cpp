@@ -65,6 +65,13 @@ private slots:
 	void passTestStructToCppAsPointer ();
 	void verifyStructureWrapperExistsOnlyOnce ();
 	
+	// Ownership
+	void verifyObjectHandlerBehaviour_data ();
+	void verifyObjectHandlerBehaviour ();
+	void destroyOwnedQObject ();
+	void leaveUnownedQObjectAlone ();
+	void reownedQObjectNotDestroyed ();
+	
 private:
 	bool hasTria = false;
 	
@@ -446,6 +453,163 @@ void LuaRuntimeTest::verifyStructureWrapperExistsOnlyOnce () {
 	// 
 	QVERIFY(func (f).toBool ());
 	
+}
+
+Q_DECLARE_METATYPE(Nuria::LuaRuntime::Ownership)
+Q_DECLARE_METATYPE(Nuria::LuaRuntime::OwnershipFlags)
+
+void LuaRuntimeTest::verifyObjectHandlerBehaviour_data () {
+	QTest::addColumn< LuaRuntime::Ownership > ("owner"); // Ownership of the object
+	QTest::addColumn< LuaRuntime::OwnershipFlags > ("mask"); // Handler mask
+	QTest::addColumn< bool > ("called"); // If the handler should be called
+	QTest::addColumn< bool > ("destroy"); // What the handler returns
+	
+	LuaRuntime::OwnershipFlags flagBoth = LuaRuntime::OwnershipFlags (LuaRuntime::OwnedByCpp |
+	                                                                  LuaRuntime::OwnedByLua);
+	LuaRuntime::OwnershipFlags flagCpp = LuaRuntime::OwnedByCpp;
+	LuaRuntime::OwnershipFlags flagLua = LuaRuntime::OwnedByLua;
+	
+	// 
+	QTest::newRow ("cpp-keep") << LuaRuntime::OwnedByCpp << flagBoth << true << false;
+	QTest::newRow ("cpp-destroy") << LuaRuntime::OwnedByCpp << flagBoth << true << true;
+	QTest::newRow ("lua-keep") << LuaRuntime::OwnedByLua << flagBoth << true << false;
+	QTest::newRow ("lua-destroy") << LuaRuntime::OwnedByLua << flagBoth << true << true;
+	
+	QTest::newRow ("cpp-keep") << LuaRuntime::OwnedByCpp << flagCpp << true << false;
+	QTest::newRow ("cpp-destroy") << LuaRuntime::OwnedByCpp << flagCpp << true << true;
+	QTest::newRow ("lua-keep-not-called") << LuaRuntime::OwnedByLua << flagCpp << false << false;
+	QTest::newRow ("lua-destroy-not-called") << LuaRuntime::OwnedByLua << flagCpp << false << true;
+	
+	
+	QTest::newRow ("cpp-keep-not-called") << LuaRuntime::OwnedByCpp << flagLua << false << false;
+	QTest::newRow ("cpp-destroy-not-called") << LuaRuntime::OwnedByCpp << flagLua << false << true;
+	QTest::newRow ("lua-keep") << LuaRuntime::OwnedByLua << flagLua << true << false;
+	QTest::newRow ("lua-destroy") << LuaRuntime::OwnedByLua << flagLua << true << true;
+	
+}
+
+void LuaRuntimeTest::verifyObjectHandlerBehaviour () {
+	NEEDS_TRIA;
+	
+	QFETCH(Nuria::LuaRuntime::Ownership, owner);
+	QFETCH(Nuria::LuaRuntime::OwnershipFlags, mask);
+	QFETCH(bool, called);
+	QFETCH(bool, destroy);
+	
+	// 
+	LuaRuntime::Ownership reportedOwner;
+	void *reportedObject = nullptr;
+	MetaObject *reportedMeta = nullptr;
+	bool handlerCalled = false;
+	auto handler = [&](LuaRuntime::Ownership o, void *obj, MetaObject *meta) {
+		reportedOwner = o;
+		reportedObject = obj;
+		reportedMeta = meta;
+		handlerCalled = true;
+		return destroy;
+	};
+	
+	// 
+	LuaRuntime runtime (LuaRuntime::AllLibraries);
+	MetaObject *meta = MetaObject::byName ("TestObject");
+	TestObject *object = new TestObject;
+	
+	// 
+	bool takeOwnership = (owner == LuaRuntime::OwnedByLua);
+	runtime.setObjectHandler (handler, mask);
+	runtime.setGlobal ("foo", LuaObject::fromStructure (object, meta, &runtime, takeOwnership));
+	
+	if (takeOwnership) {
+		QTest::ignoreMessage (QtDebugMsg, "~TestObject");
+		QCOMPARE(object->parent (), &runtime);
+	} else {
+		QCOMPARE(object->parent (), (QObject *)nullptr);
+	}
+	
+	// 
+	QVERIFY(runtime.execute ("foo = nil"));
+	runtime.collectGarbage ();
+	runtime.collectGarbage ();
+	
+	// 
+	QCOMPARE(handlerCalled, called);
+	
+	if (handlerCalled) {
+		QCOMPARE(reportedOwner, owner);
+		QCOMPARE(reportedObject, object);
+		QCOMPARE(reportedMeta, meta);
+	}
+	
+	// 
+	if (!takeOwnership) {
+		QTest::ignoreMessage (QtDebugMsg, "~TestObject");
+		delete object;
+	}
+	
+}
+
+void LuaRuntimeTest::destroyOwnedQObject () {
+	NEEDS_TRIA;
+	
+	LuaRuntime runtime (LuaRuntime::AllLibraries);
+	MetaObject *meta = MetaObject::byName ("TestObject");
+	TestObject *object = new TestObject;
+	QSignalSpy spy (object, SIGNAL(destroyed()));
+	
+	// 
+	QTest::ignoreMessage (QtDebugMsg, "~TestObject");
+	runtime.setGlobal ("foo", LuaObject::fromStructure (object, meta, &runtime, true));
+	QCOMPARE(object->parent (), &runtime);
+	
+	QVERIFY(runtime.execute ("foo = nil"));
+	runtime.collectGarbage ();
+	runtime.collectGarbage ();
+	
+	// 
+	QCOMPARE(spy.length (), 1);
+}
+
+void LuaRuntimeTest::leaveUnownedQObjectAlone () {
+	NEEDS_TRIA;
+	
+	LuaRuntime runtime (LuaRuntime::AllLibraries);
+	MetaObject *meta = MetaObject::byName ("TestObject");
+	TestObject *object = new TestObject;
+	QSignalSpy spy (object, SIGNAL(destroyed()));
+	
+	// 
+	runtime.setGlobal ("foo", LuaObject::fromStructure (object, meta, &runtime, false));
+	QCOMPARE(object->parent (), (QObject *)nullptr);
+	
+	QVERIFY(runtime.execute ("foo = nil"));
+	runtime.collectGarbage ();
+	runtime.collectGarbage ();
+	
+	// 
+	QCOMPARE(spy.length (), 0);
+	QTest::ignoreMessage (QtDebugMsg, "~TestObject");
+	delete object;
+}
+
+void LuaRuntimeTest::reownedQObjectNotDestroyed () {
+	NEEDS_TRIA;
+	
+	LuaRuntime runtime (LuaRuntime::AllLibraries);
+	MetaObject *meta = MetaObject::byName ("TestObject");
+	TestObject *object = new TestObject;
+	QSignalSpy spy (object, SIGNAL(destroyed()));
+	
+	// 
+	runtime.setGlobal ("foo", LuaObject::fromStructure (object, meta, &runtime, true));
+	QCOMPARE(object->parent (), &runtime);
+	object->setParent (qApp); // Move ownership to another QObject
+	
+	QVERIFY(runtime.execute ("foo = nil"));
+	runtime.collectGarbage ();
+	runtime.collectGarbage ();
+	
+	// 
+	QCOMPARE(spy.length (), 0);
 }
 
 QTEST_MAIN(LuaRuntimeTest)

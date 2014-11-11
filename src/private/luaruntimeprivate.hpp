@@ -37,6 +37,8 @@ public:
 	bool hasObject (void *object);
 	void *userDataOfObject (void *object);
 	void removeObject (void *object);
+	
+	bool checkQObjectOwnership(LuaRuntime *runtime, LuaWrapperUserData *data);
 	void pushOrCreateUserDataObject (void *object, MetaObject *meta,
 					 int metaTable, bool owned, int ref = 0);
 	void pushWrapperObject (MetaObject *meta, int metaTable);

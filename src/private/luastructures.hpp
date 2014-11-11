@@ -25,10 +25,10 @@ namespace Nuria {
 class Q_DECL_HIDDEN LuaWrapperUserData {
 public:
 	
-	bool owned; // Does LUA own the object?
-	int reference = 0; // LUA table which extends upon 'ptr'
+	bool owned; // Does Lua own the object?
+	int reference = 0; // Lua table which extends upon 'ptr'
 	void *ptr = nullptr; // The object
-	Nuria::MetaObject *meta; // MetaObject of 'ptr'
+	MetaObject *meta; // MetaObject of 'ptr'
 	
 };
 
