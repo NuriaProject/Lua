@@ -42,9 +42,10 @@ public:
 	
 	static QVariant luaValuesToVariant (const LuaValues &values);
 	
-	static QVariant variantFromStack (LuaRuntime *runtime, int idx);
-	static QVariant tableFromStack (LuaRuntime *runtime, int idx);
-	static void traverseTable (LuaRuntime *runtime, QVariantMap &map, QVariantList &list, int idx);
+	static QVariant variantFromStack (LuaRuntime *runtime, int idx, bool takeOwnership = false);
+	static QVariant tableFromStack (LuaRuntime *runtime, int idx, bool takeOwnership);
+	static void traverseTable (LuaRuntime *runtime, QVariantMap &map, QVariantList &list, int idx,
+	                           bool takeOwnership);
 	static void mergeTable (QVariantMap &map, const QVariantList &list);
 		
 	

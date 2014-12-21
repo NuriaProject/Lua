@@ -204,7 +204,7 @@ Nuria::LuaRuntime::Ownership Nuria::LuaRuntime::objectOwnership (void *object) {
 	return (data->owned) ? OwnedByLua : OwnedByCpp;
 }
 
-void Nuria::LuaRuntime::setObjectOwnership(void *object, Ownership ownership) {
+void Nuria::LuaRuntime::setObjectOwnership (void *object, Ownership ownership) {
 	LuaWrapperUserData *data = this->d_ptr->objects.value (object);
 	if (data) {
 		data->owned = (ownership == OwnedByLua);

@@ -17,13 +17,16 @@
 
 #include "luametaobjectwrapper.hpp"
 
-#include <nuria/metaobject.hpp>
+#include "../nuria/luaruntime.hpp"
 #include "luaruntimeprivate.hpp"
+#include <nuria/metaobject.hpp>
+#include <nuria/serializer.hpp>
 #include "luastackutils.hpp"
 #include "luastructures.hpp"
-#include "../nuria/luaruntime.hpp"
 #include <nuria/debug.hpp>
+#include <QVariant>
 #include <lua.hpp>
+#include <QSet>
 
 namespace Nuria {
 class LuaMetaObjectWrapperPrivate {
@@ -126,6 +129,15 @@ public:
 		return LuaMetaObjectWrapper::invokeMethod (env);
 		
 	}
+	
+	static int delegateDeclarativeCreation (lua_State *env) {
+		LuaRuntime *runtime = (LuaRuntime *)lua_touserdata (env, lua_upvalueindex(1));
+		void *inst = lua_touserdata (env, 1);
+		LuaWrapperUserData *data = (LuaWrapperUserData *)inst;
+		
+		return LuaMetaObjectWrapper::declarativeCreate (runtime, env, data->meta);
+	}
+	
 };
 }
 }
@@ -161,6 +173,7 @@ void Nuria::LuaMetaObjectWrapper::populateMetaTable () {
 	pushClosureIntoTable (env, "__index", &Internal::Delegate::delegateRead, runtime);
 	pushClosureIntoTable (env, "__newindex", &Internal::Delegate::delegateWrite, runtime);
 	pushClosureIntoTable (env, "__gc", &Internal::Delegate::delegateDestroy, runtime);
+	pushClosureIntoTable (env, "__call", &Internal::Delegate::delegateDeclarativeCreation, runtime);
 	
 	// Store reference to the meta table
 	this->d_ptr->metaRef = luaL_ref (env, LUA_REGISTRYINDEX);
@@ -305,6 +318,36 @@ int Nuria::LuaMetaObjectWrapper::invokeMethod (void *state) {
 	pushInvocationResult (runtime, data->meta, idx, result);
 	return 1;
 	
+}
+
+int Nuria::LuaMetaObjectWrapper::declarativeCreate (LuaRuntime *runtime, lua_State *env, MetaObject *meta) {
+	// Lua calls this function as func(self, argument), where argument has
+	// to be a table in our case.
+	if (!lua_istable(env, 2)) {
+		return luaL_error (env, "Declarative creation expects a table as only argument.");
+	}
+	
+	// Convert table, taking ownership of all objects inside.
+	QVariant argData = LuaStackUtils::tableFromStack (runtime, 2, true);
+	if (argData.userType () == QMetaType::QVariantList) {
+		return luaL_error (env, "The passed table must be associative data, not an array.");
+	}
+	
+	// Use Nuria::Serializer
+	Serializer serializer;
+	serializer.setRecursionDepth (Serializer::InfiniteRecursion);
+	QVariantMap map = argData.toMap ();
+	void *inst = serializer.deserialize (map, meta);
+	
+	// Sanity check
+	if (!inst) {
+		return luaL_error (env, "Failed to construct instance of type %s",
+		                   meta->className ().constData ());
+	}
+	
+	// Push the instance on to the stack while transferring ownership to the environment.
+	LuaObject::fromStructure (inst, meta, runtime, true).pushOnStack ();
+	return 1;
 }
 
 void Nuria::LuaMetaObjectWrapper::pushInvocationResult (Nuria::LuaRuntime *runtime, Nuria::MetaObject *meta,

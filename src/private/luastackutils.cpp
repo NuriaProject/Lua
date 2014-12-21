@@ -19,6 +19,7 @@
 
 #include "luacallbacktrampoline.hpp"
 #include "../nuria/luaruntime.hpp"
+#include "luaruntimeprivate.hpp"
 #include <nuria/callback.hpp>
 
 Nuria::LuaValues Nuria::LuaStackUtils::popResultsFromStack (LuaRuntime *runtime, int oldTop) {
@@ -179,7 +180,8 @@ QVariant Nuria::LuaStackUtils::luaValuesToVariant (const Nuria::LuaValues &value
 	return list;
 }
 
-QVariant Nuria::LuaStackUtils::variantFromStack (LuaRuntime *runtime, int idx) {
+#include <nuria/debug.hpp>
+QVariant Nuria::LuaStackUtils::variantFromStack (LuaRuntime *runtime, int idx, bool takeOwnership) {
 	lua_State *env = (lua_State *)runtime->luaState ();
 	int type = lua_type (env, idx);
 	
@@ -192,11 +194,15 @@ QVariant Nuria::LuaStackUtils::variantFromStack (LuaRuntime *runtime, int idx) {
 		const char *str = lua_tolstring (env, idx, &len);
 		return (str) ? QString::fromUtf8 (str, len) : QVariant ();
 	}
-	case LUA_TTABLE: return tableFromStack (runtime, idx);
+	case LUA_TTABLE: return tableFromStack (runtime, idx, takeOwnership);
 	case LUA_TFUNCTION: return LuaCallbackTrampoline::functionFromStack (runtime, idx);
-	case LUA_TUSERDATA:
-		
-		// TODO: Can we make something useful out of a LUA thread?
+	case LUA_TUSERDATA: {
+		void *ptr = const_cast< void * > (lua_topointer (env, idx));
+		LuaWrapperUserData *data = (LuaWrapperUserData *)ptr;
+		if (takeOwnership) { data->owned = false; }
+		return QVariant (data->meta->pointerMetaTypeId (), &data->ptr);
+	}
+		// TODO: Can we make something useful out of a Lua thread?
 	case LUA_TTHREAD: return QVariant ();
 	case LUA_TLIGHTUSERDATA:
 		return QVariant::fromValue (const_cast< void * > (lua_topointer (env, idx)));
@@ -205,11 +211,11 @@ QVariant Nuria::LuaStackUtils::variantFromStack (LuaRuntime *runtime, int idx) {
 	return QVariant ();
 }
 
-QVariant Nuria::LuaStackUtils::tableFromStack (LuaRuntime *runtime, int idx) {
+QVariant Nuria::LuaStackUtils::tableFromStack (LuaRuntime *runtime, int idx, bool takeOwnership) {
 	QVariantList list;
 	QVariantMap map;
 	
-	traverseTable (runtime, map, list, idx);
+	traverseTable (runtime, map, list, idx, takeOwnership);
 	
 	// Is it a map?
 	if (!map.isEmpty ()) {
@@ -221,7 +227,8 @@ QVariant Nuria::LuaStackUtils::tableFromStack (LuaRuntime *runtime, int idx) {
 	return list;
 }
 
-void Nuria::LuaStackUtils::traverseTable (LuaRuntime *runtime, QVariantMap &map, QVariantList &list, int idx) {
+void Nuria::LuaStackUtils::traverseTable (LuaRuntime *runtime, QVariantMap &map, QVariantList &list, int idx,
+                                          bool takeOwnership) {
 	lua_State *env = (lua_State *)runtime->luaState ();
 	double num = 0.f;
 	
@@ -235,10 +242,10 @@ void Nuria::LuaStackUtils::traverseTable (LuaRuntime *runtime, QVariantMap &map,
 		// -3 = Table
 		// Type of the key. If it's the next index, append it to 'list'.
 		if (lua_isnumber (env, -2) && (num = lua_tonumber (env, -2)) == list.length () + 1) {
-			list.append (variantFromStack (runtime, -1));
+			list.append (variantFromStack (runtime, -1, takeOwnership));
 		} else {
-			QString key = variantFromStack (runtime, -2).toString ();
-			map.insert (key, variantFromStack (runtime, -1));
+			QString key = variantFromStack (runtime, -2, takeOwnership).toString ();
+			map.insert (key, variantFromStack (runtime, -1, takeOwnership));
 		}
 		
 		// Remove the value from stack

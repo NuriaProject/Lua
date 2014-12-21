@@ -55,6 +55,20 @@ public:
 	
 };
 
+struct NURIA_INTROSPECT Complex {
+	int id;
+	
+	~Complex () {
+		delete b;
+		delete next;
+	}
+	
+	TestStruct a;
+	TestStruct *b = nullptr;
+	Complex *next = nullptr;
+	
+};
+
 // Needed for QVariant::fromValue().
 Q_DECLARE_METATYPE(TestObject*)
 Q_DECLARE_METATYPE(TestStruct*)

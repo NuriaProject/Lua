@@ -20,6 +20,8 @@
 
 #include <QObject>
 
+struct lua_State;
+
 namespace Nuria {
 
 class LuaMetaObjectWrapperPrivate;
@@ -77,6 +79,7 @@ private:
 	static bool pushField (LuaRuntime *runtime, void *inst, const QByteArray &name);
 	
 	static int invokeMethod (void *state);
+	static int declarativeCreate (LuaRuntime *runtime, lua_State *env, MetaObject *meta);
 	static void pushInvocationResult (LuaRuntime *runtime, MetaObject *meta,
 					  int funcIdx, QVariant &result);
 	static bool findPossibleMethodsByArgCount (MetaObject *meta, int count, int &begin, int &end);

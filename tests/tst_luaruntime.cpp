@@ -64,6 +64,8 @@ private slots:
 	void passTestStructToCpp ();
 	void passTestStructToCppAsPointer ();
 	void verifyStructureWrapperExistsOnlyOnce ();
+	void createInstanceDeclarative ();
+	void createComplexInstanceDeclarative ();
 	
 	// Ownership
 	void verifyObjectHandlerBehaviour_data ();
@@ -453,6 +455,70 @@ void LuaRuntimeTest::verifyStructureWrapperExistsOnlyOnce () {
 	// 
 	QVERIFY(func (f).toBool ());
 	
+}
+
+void LuaRuntimeTest::createInstanceDeclarative () {
+	NEEDS_TRIA;
+	
+	LuaRuntime runtime (LuaRuntime::AllLibraries);
+	MetaObject *meta = MetaObject::byName ("TestStruct");
+	runtime.registerMetaObject (meta, "Test::");
+	
+	runtime.execute ("a = Test.TestStruct { a = 123, b = 456, c = 'declarative' }");
+	LuaObject obj = runtime.global ("a").object ();
+	
+	QVERIFY(obj.isValid ());
+	TestStruct *test = (TestStruct *)obj.object ();
+	QVERIFY(test);
+	
+	QCOMPARE(test->a, 123);
+	QCOMPARE(test->b, 456);
+	QCOMPARE(test->c, QString ("declarative"));
+	
+}
+
+void LuaRuntimeTest::createComplexInstanceDeclarative () {
+	NEEDS_TRIA;
+	
+	LuaRuntime runtime (LuaRuntime::AllLibraries);
+	runtime.registerMetaObject (MetaObject::byName ("Complex"), "Test::");
+	runtime.registerMetaObject (MetaObject::byName ("TestStruct"), "Test::");
+	
+	runtime.execute ("a = Test.Complex {"
+	                 "  id = 1,"
+	                 "  a = Test.TestStruct { a = 123, b = 456, c = 'stack' },"
+	                 "  b = Test.TestStruct { a = 147, b = 258, c = 'heap' },"
+	                 "  next = Test.Complex {"
+	                 "    id = 2,"
+	                 "    a = Test.TestStruct { a = 321, b = 654, c = 'foo' },"
+	                 "    b = Test.TestStruct { a = 963, b = 852, c = 'bar' },"
+	                 "    next = Test.Complex { id = 3 }"
+	                 "  }"
+	                 "}");
+	LuaObject obj = runtime.global ("a").object ();
+	
+	QVERIFY(obj.isValid ());
+	Complex *root = (Complex *)obj.object ();
+	
+	QVERIFY(root);
+	QCOMPARE(root->id, 1);
+	QCOMPARE(root->a.a, 123);
+	QCOMPARE(root->a.b, 456);
+	QCOMPARE(root->a.c, QString ("stack"));
+	QVERIFY(root->b);
+	QCOMPARE(root->b->a, 147);
+	QCOMPARE(root->b->b, 258);
+	QCOMPARE(root->b->c, QString ("heap"));
+	QVERIFY(root->next);
+	QCOMPARE(root->next->a.a, 321);
+	QCOMPARE(root->next->a.b, 654);
+	QCOMPARE(root->next->a.c, QString ("foo"));
+	QVERIFY(root->next->b);
+	QCOMPARE(root->next->b->a, 963);
+	QCOMPARE(root->next->b->b, 852);
+	QCOMPARE(root->next->b->c, QString ("bar"));
+	QVERIFY(root->next->next);
+	QCOMPARE(root->next->next->id, 3);
 }
 
 Q_DECLARE_METATYPE(Nuria::LuaRuntime::Ownership)
