@@ -66,7 +66,7 @@ void Nuria::LuaRuntimePrivate::removeObject (void *object) {
 
 bool Nuria::LuaRuntimePrivate::checkQObjectOwnership (LuaRuntime *runtime, LuaWrapperUserData *data) {
 	const QMetaObject *meta = QMetaType::metaObjectForType (data->meta->pointerMetaTypeId ());
-	if (meta) {
+	if (meta && data->ptr) {
 		data->owned = (static_cast< QObject * > (data->ptr)->parent () == runtime);
 	}
 	
