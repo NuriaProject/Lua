@@ -19,7 +19,7 @@
 #include "luastackutils.hpp"
 #include "../nuria/luaruntime.hpp"
 #include "../nuria/luavalue.hpp"
-#include <nuria/debug.hpp>
+#include <nuria/logger.hpp>
 #include <QPointer>
 
 namespace Nuria {

@@ -179,7 +179,7 @@ QVariant Nuria::LuaStackUtils::luaValuesToVariant (const Nuria::LuaValues &value
 	return list;
 }
 
-#include <nuria/debug.hpp>
+#include <nuria/logger.hpp>
 QVariant Nuria::LuaStackUtils::variantFromStack (LuaRuntime *runtime, int idx, bool takeOwnership) {
 	lua_State *env = (lua_State *)runtime->luaState ();
 	int type = lua_type (env, idx);

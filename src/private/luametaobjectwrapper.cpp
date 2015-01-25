@@ -22,7 +22,7 @@
 #include <nuria/serializer.hpp>
 #include "luastackutils.hpp"
 #include "luastructures.hpp"
-#include <nuria/debug.hpp>
+#include <nuria/logger.hpp>
 #include <QVariant>
 #include <lua.hpp>
 #include <QSet>

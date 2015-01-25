@@ -19,7 +19,7 @@
 
 #include <nuria/luaruntime.hpp>
 #include <nuria/metaobject.hpp>
-#include <nuria/debug.hpp>
+#include <nuria/logger.hpp>
 #include "structures.hpp"
 
 using namespace Nuria;

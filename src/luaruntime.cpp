@@ -18,7 +18,7 @@
 
 #include <nuria/metaobject.hpp>
 #include <nuria/callback.hpp>
-#include <nuria/debug.hpp>
+#include <nuria/logger.hpp>
 #include <QIODevice>
 #include <QPointer>
 #include <QVariant>
